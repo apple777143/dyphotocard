@@ -14,8 +14,8 @@
         
         /* 카드 뷰 영역 */
         .card-container { flex-grow: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; position: relative; padding: 15px; box-sizing: border-box; overflow: hidden; }
-        .card-card { width: 100%; max-width: 280px; max-height: 65vh; background: #222; border-radius: 16px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.5); display: flex; flex-direction: column; position: relative; }
-        .card-card img { width: 100%; height: 100%; object-fit: contain; background: #1a1a1a; display: block; }
+        .card-card { width: 100%; max-width: 280px; max-height: 65vh; aspect-ratio: 3/4; background: #222; border-radius: 16px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.5); display: flex; flex-direction: column; position: relative; }
+        .card-card img { width: 100%; height: 100%; object-fit: cover; background: #1a1a1a; display: block; }
         
         /* 3분할 버튼 영역 */
         .btn-group { display: flex; width: 100%; max-width: 280px; gap: 10px; padding: 15px 0; justify-content: center; flex-shrink: 0; }
@@ -34,18 +34,18 @@
         .sub-actions { display: flex; justify-content: space-between; align-items: center; padding: 8px 15px; background: #1a1a1a; border-bottom: 1px solid #333; font-size: 0.8rem; flex-shrink: 0; }
         .sub-btn { background: #333; color: #fff; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; }
         
-        /* 모달 그리드: 3열 배치 + 강제 비율 제거 및 스크롤 최적화 */
+        /* 모달 그리드: 3열 배치 + 3:4 비율 유지 및 스크롤 최적화 */
         .modal-grid { flex-grow: 1; overflow-y: auto; display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; padding: 12px; align-content: start; -webkit-overflow-scrolling: touch; }
-        .grid-item { background: #1a1a1a; border-radius: 8px; overflow: hidden; display: flex; flex-direction: column; position: relative; border: 2px solid transparent; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+        .grid-item { background: #1a1a1a; border-radius: 8px; overflow: hidden; display: flex; flex-direction: column; aspect-ratio: 3/4; position: relative; border: 2px solid transparent; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
         .grid-item.selected { border-color: #2196F3; }
         .grid-item.selected::after { content: '✓'; position: absolute; top: 6px; right: 6px; background: #2196F3; color: white; width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: bold; z-index: 3; }
         
         .grid-item.already-my { opacity: 0.45; cursor: not-allowed; border-color: #555; }
         .grid-item.already-my::before { content: '완료'; position: absolute; top: 6px; left: 6px; background: #666; color: white; padding: 2px 5px; font-size: 0.65rem; border-radius: 4px; font-weight: bold; z-index: 2; }
 
-        .grid-item .img-box { width: 100%; background: #000; display: flex; align-items: center; justify-content: center; overflow: hidden; }
-        .grid-item img { width: 100%; height: auto; object-fit: contain; display: block; }
-        .grid-item span { font-size: 0.65rem; color: #ddd; padding: 6px; text-align: center; line-height: 1.1; word-break: keep-all; background: #222; font-weight: bold; flex-shrink: 0; }
+        .grid-item .img-box { width: 100%; flex: 1; background: #000; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+        .grid-item img { width: 100%; height: 100%; object-fit: cover; display: block; }
+        .grid-item span { font-size: 0.65rem; color: #ddd; padding: 5px; text-align: center; line-height: 1.1; word-break: keep-all; background: #222; font-weight: bold; flex-shrink: 0; }
         
         .modal-footer { padding: 15px; background: #222; display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-shrink: 0; }
         .reclassify-btn { background: #2196F3; color: white; border: none; padding: 10px 12px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 0.85rem; }
@@ -53,14 +53,14 @@
         .remove-btn { background: #ff5252; color: white; border: none; padding: 10px 12px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 0.85rem; flex-grow: 1; text-align: center; display: none; }
         .empty-msg { text-align: center; color: #777; margin-top: 50px; grid-column: span 3; }
 
-        /* 인쇄 및 전체보기 전용 팝업 뷰어 (기존 유지) */
+        /* 인쇄 및 전체보기 전용 팝업 뷰어 */
         .text-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #111; display: none; flex-direction: column; z-index: 20; padding: 15px; box-sizing: border-box; }
         .text-modal-content { flex-grow: 1; background: #1a1a1a; border-radius: 8px; display: flex; flex-direction: column; overflow: hidden; margin-bottom: 15px; border: 1px solid #333; }
         
         .view-card-grid { flex-grow: 1; overflow-y: auto; display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; padding: 15px; align-content: start; width: 100%; box-sizing: border-box; -webkit-overflow-scrolling: touch; }
         .view-card-item { background: #222; border-radius: 8px; overflow: hidden; display: flex; flex-direction: column; aspect-ratio: 3/4; }
         .view-card-item .img-box { width: 100%; flex: 1; background: #000; display: flex; align-items: center; justify-content: center; overflow: hidden; }
-        .view-card-item img { width: 100%; height: 100%; object-fit: contain; display: block; }
+        .view-card-item img { width: 100%; height: 100%; object-fit: cover; display: block; }
         .view-card-item span { font-size: 0.8rem; color: #ddd; padding: 8px; text-align: center; line-height: 1.2; background: #222; font-weight: bold; }
 
         /* [인쇄 설정] 원본 유지 */
@@ -104,7 +104,7 @@
             .view-card-item img {
                 width: 100% !important;
                 height: 100% !important;
-                object-fit: contain !important; 
+                object-fit: cover !important; 
             }
             
             .view-card-item span { 
