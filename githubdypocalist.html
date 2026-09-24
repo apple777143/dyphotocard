@@ -15,7 +15,7 @@
         /* 카드 뷰 영역 */
         .card-container { flex-grow: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; position: relative; padding: 15px; box-sizing: border-box; overflow: hidden; }
         .card-card { width: 100%; max-width: 280px; max-height: 65vh; background: #222; border-radius: 16px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.5); display: flex; flex-direction: column; position: relative; }
-        .card-card img { width: 100%; height: 100%; object-fit: contain; background: #1a1a1a; display: block; }
+        .card-card img { width: 100%; height: 100%; object-fit: cover; background: #1a1a1a; display: block; }
         
         /* 3분할 버튼 영역 */
         .btn-group { display: flex; width: 100%; max-width: 280px; gap: 10px; padding: 15px 0; justify-content: center; flex-shrink: 0; }
@@ -24,7 +24,7 @@
         .btn-hold { background: #333; color: #ffcc00; }
         .btn-save { background: #4CAF50; color: white; }
         
-        /* 목록 모달 뷰 */
+        /* 목록 모달 화면 */
         .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #111; display: none; flex-direction: column; z-index: 10; }
         .modal-header { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; background: #222; flex-shrink: 0; }
         .modal-tabs { display: flex; background: #1a1a1a; padding: 10px; gap: 5px; justify-content: center; flex-wrap: wrap; flex-shrink: 0; }
@@ -34,46 +34,69 @@
         .sub-actions { display: flex; justify-content: space-between; align-items: center; padding: 8px 15px; background: #1a1a1a; border-bottom: 1px solid #333; font-size: 0.8rem; flex-shrink: 0; }
         .sub-btn { background: #333; color: #fff; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; }
         
-        /* [핵심 수정] 목록 그리드: 세로 스크롤이 가능하고 포카가 절대 잘리지 않도록 비율 유지 */
-        .modal-grid { flex-grow: 1; overflow-y: auto; display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; padding: 10px; align-content: start; -webkit-overflow-scrolling: touch; }
-        .grid-item { background: #1a1a1a; border-radius: 6px; overflow: hidden; display: flex; flex-direction: column; position: relative; border: 2px solid transparent; cursor: pointer; }
+        /* [수정] 모달 그리드: 사진이 작지 않고 큼직하게 보이도록 2열 배치 + 세로 스크롤 가능 */
+        .modal-grid { flex-grow: 1; overflow-y: auto; display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; padding: 15px; align-content: start; -webkit-overflow-scrolling: touch; }
+        .grid-item { background: #1a1a1a; border-radius: 8px; overflow: hidden; display: flex; flex-direction: column; position: relative; border: 2px solid transparent; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
         .grid-item.selected { border-color: #2196F3; }
-        .grid-item.selected::after { content: '✓'; position: absolute; top: 3px; right: 3px; background: #2196F3; color: white; width: 16px; height: 16px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.65rem; font-weight: bold; z-index: 3; }
+        .grid-item.selected::after { content: '✓'; position: absolute; top: 8px; right: 8px; background: #2196F3; color: white; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.85rem; font-weight: bold; z-index: 3; }
         
         .grid-item.already-my { opacity: 0.45; cursor: not-allowed; border-color: #555; }
-        .grid-item.already-my::before { content: '완료'; position: absolute; top: 3px; left: 3px; background: #666; color: white; padding: 1px 3px; font-size: 0.55rem; border-radius: 3px; font-weight: bold; z-index: 2; }
+        .grid-item.already-my::before { content: '완료'; position: absolute; top: 8px; left: 8px; background: #666; color: white; padding: 2px 6px; font-size: 0.7rem; border-radius: 4px; font-weight: bold; z-index: 2; }
 
-        /* 포카 원본 비율(3:4 또는 사진 비율)을 완벽히 유지하며 스크롤되도록 설정 */
+        /* 사진 크기를 충분히 보장하고 꽉 차게 표시 (object-fit: cover) */
         .grid-item .img-box { width: 100%; aspect-ratio: 3/4; background: #000; display: flex; align-items: center; justify-content: center; overflow: hidden; }
-        .grid-item img { width: 100%; height: 100%; object-fit: contain; display: block; }
-        .grid-item span { font-size: 0.6rem; color: #ccc; padding: 6px 3px; text-align: center; line-height: 1.1; word-break: keep-all; background: #222; flex-grow: 1; display: flex; align-items: center; justify-content: center; }
+        .grid-item img { width: 100%; height: 100%; object-fit: cover; display: block; }
+        .grid-item span { font-size: 0.8rem; color: #ddd; padding: 10px 8px; text-align: center; line-height: 1.2; word-break: keep-all; background: #222; font-weight: bold; }
         
         .modal-footer { padding: 15px; background: #222; display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-shrink: 0; }
         .reclassify-btn { background: #2196F3; color: white; border: none; padding: 10px 12px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 0.85rem; }
         .confirm-btn { background: #4CAF50; color: white; border: none; padding: 10px 12px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 0.85rem; flex-grow: 1; text-align: center; }
         .remove-btn { background: #ff5252; color: white; border: none; padding: 10px 12px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 0.85rem; flex-grow: 1; text-align: center; display: none; }
-        .empty-msg { text-align: center; color: #777; margin-top: 50px; grid-column: span 4; }
+        .empty-msg { text-align: center; color: #777; margin-top: 50px; grid-column: span 2; }
 
         /* 인쇄 및 전체보기 전용 팝업 뷰어 */
         .text-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #111; display: none; flex-direction: column; z-index: 20; padding: 15px; box-sizing: border-box; }
         .text-modal-content { flex-grow: 1; background: #1a1a1a; border-radius: 8px; display: flex; flex-direction: column; overflow: hidden; margin-bottom: 15px; border: 1px solid #333; }
         
-        .view-card-grid { flex-grow: 1; overflow-y: auto; display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; padding: 10px; align-content: start; width: 100%; box-sizing: border-box; -webkit-overflow-scrolling: touch; }
-        .view-card-item { background: #222; border-radius: 6px; overflow: hidden; display: flex; flex-direction: column; }
+        .view-card-grid { flex-grow: 1; overflow-y: auto; display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; padding: 15px; align-content: start; width: 100%; box-sizing: border-box; -webkit-overflow-scrolling: touch; }
+        .view-card-item { background: #222; border-radius: 8px; overflow: hidden; display: flex; flex-direction: column; }
         .view-card-item .img-box { width: 100%; aspect-ratio: 3/4; background: #000; display: flex; align-items: center; justify-content: center; overflow: hidden; }
-        .view-card-item img { width: 100%; height: 100%; object-fit: contain; display: block; }
-        .view-card-item span { font-size: 0.6rem; color: #ccc; padding: 6px 3px; text-align: center; line-height: 1.1; background: #222; }
+        .view-card-item img { width: 100%; height: 100%; object-fit: cover; display: block; }
+        .view-card-item span { font-size: 0.8rem; color: #ddd; padding: 10px 8px; text-align: center; line-height: 1.2; background: #222; font-weight: bold; }
 
+        /* [핵심 수정] 인쇄(PDF 저장) 시 한 페이지에 최대 7줄(행)까지만 들어가도록 엄격히 제어 및 페이지 강제 나눔 */
         @media print {
             body * { visibility: hidden; }
             #textModal, #textModal * { visibility: visible; }
             #textModal { position: absolute; left: 0; top: 0; width: 100%; background: white; color: black; padding: 0; }
-            .text-modal-content { background: white; border: none; }
-            .view-card-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
-            .view-card-item { background: #fff; border: 1px solid #ddd; }
-            .view-card-item .img-box { background: #fff; }
-            .view-card-item span { color: black; background: #fff; }
-            #textModal button { display: none; }
+            .text-modal-content { background: white; border: none; overflow: visible; }
+            
+            .view-card-grid { 
+                display: grid !important; 
+                grid-template-columns: repeat(2, 1fr) !important; 
+                gap: 10px !important; 
+                overflow: visible !important;
+                padding: 0 !important;
+            }
+            
+            /* 카드 아이템 높이 설정 및 페이지 넘김 제어 (한 페이지에 7줄 = 총 14개 아이템 제한) */
+            .view-card-item { 
+                background: #fff !important; 
+                border: 1px solid #ccc !important; 
+                break-inside: avoid !important;
+                page-break-inside: avoid !important;
+                margin-bottom: 10px;
+            }
+            
+            /* 14번째 카드마다 강제로 다음 페이지로 넘김 (7줄 * 2열 = 14개) */
+            .view-card-item:nth-child(14n) {
+                break-after: page !important;
+                page-break-after: always !important;
+            }
+
+            .view-card-item .img-box { background: #fff !important; }
+            .view-card-item span { color: black !important; background: #fff !important; }
+            #textModal button { display: none !important; }
         }
     </style>
 </head>
