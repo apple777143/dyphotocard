@@ -34,36 +34,36 @@
         .sub-actions { display: flex; justify-content: space-between; align-items: center; padding: 8px 15px; background: #1a1a1a; border-bottom: 1px solid #333; font-size: 0.8rem; flex-shrink: 0; }
         .sub-btn { background: #333; color: #fff; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; }
         
-        /* 모달 그리드: 2열 배치 + 세로 스크롤 */
-        .modal-grid { flex-grow: 1; overflow-y: auto; display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; padding: 15px; align-content: start; -webkit-overflow-scrolling: touch; }
+        /* 모달 그리드: 3열 배치 (3개씩 한 행) + 3:4 비율 고정 + contain */
+        .modal-grid { flex-grow: 1; overflow-y: auto; display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 12px; align-content: start; -webkit-overflow-scrolling: touch; }
         .grid-item { background: #1a1a1a; border-radius: 8px; overflow: hidden; display: flex; flex-direction: column; position: relative; border: 2px solid transparent; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.3); aspect-ratio: 3/4; }
         .grid-item.selected { border-color: #2196F3; }
-        .grid-item.selected::after { content: '✓'; position: absolute; top: 8px; right: 8px; background: #2196F3; color: white; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.85rem; font-weight: bold; z-index: 3; }
+        .grid-item.selected::after { content: '✓'; position: absolute; top: 6px; right: 6px; background: #2196F3; color: white; width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: bold; z-index: 3; }
         
         .grid-item.already-my { opacity: 0.45; cursor: not-allowed; border-color: #555; }
-        .grid-item.already-my::before { content: '완료'; position: absolute; top: 8px; left: 8px; background: #666; color: white; padding: 2px 6px; font-size: 0.7rem; border-radius: 4px; font-weight: bold; z-index: 2; }
+        .grid-item.already-my::before { content: '완료'; position: absolute; top: 6px; left: 6px; background: #666; color: white; padding: 2px 5px; font-size: 0.65rem; border-radius: 4px; font-weight: bold; z-index: 2; }
 
         .grid-item .img-box { width: 100%; flex: 1; background: #000; display: flex; align-items: center; justify-content: center; overflow: hidden; }
         .grid-item img { width: 100%; height: 100%; object-fit: contain; display: block; }
-        .grid-item span { font-size: 0.8rem; color: #ddd; padding: 8px; text-align: center; line-height: 1.2; word-break: keep-all; background: #222; font-weight: bold; }
+        .grid-item span { font-size: 0.65rem; color: #ddd; padding: 4px; text-align: center; line-height: 1.1; word-break: keep-all; background: #222; font-weight: bold; flex-shrink: 0; }
         
         .modal-footer { padding: 15px; background: #222; display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-shrink: 0; }
         .reclassify-btn { background: #2196F3; color: white; border: none; padding: 10px 12px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 0.85rem; }
         .confirm-btn { background: #4CAF50; color: white; border: none; padding: 10px 12px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 0.85rem; flex-grow: 1; text-align: center; }
         .remove-btn { background: #ff5252; color: white; border: none; padding: 10px 12px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 0.85rem; flex-grow: 1; text-align: center; display: none; }
-        .empty-msg { text-align: center; color: #777; margin-top: 50px; grid-column: span 2; }
+        .empty-msg { text-align: center; color: #777; margin-top: 50px; grid-column: span 3; }
 
-        /* 인쇄 및 전체보기 전용 팝업 뷰어 */
+        /* 인쇄 및 전체보기 전용 팝업 뷰어 (이전 인쇄 설정 유지) */
         .text-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #111; display: none; flex-direction: column; z-index: 20; padding: 15px; box-sizing: border-box; }
         .text-modal-content { flex-grow: 1; background: #1a1a1a; border-radius: 8px; display: flex; flex-direction: column; overflow: hidden; margin-bottom: 15px; border: 1px solid #333; }
         
-        .view-card-grid { flex-grow: 1; overflow-y: auto; display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; padding: 15px; align-content: start; width: 100%; box-sizing: border-box; -webkit-overflow-scrolling: touch; }
+        .view-card-grid { flex-grow: 1; overflow-y: auto; display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; padding: 15px; align-content: start; width: 100%; box-sizing: border-box; -webkit-overflow-scrolling: touch; }
         .view-card-item { background: #222; border-radius: 8px; overflow: hidden; display: flex; flex-direction: column; aspect-ratio: 3/4; }
         .view-card-item .img-box { width: 100%; flex: 1; background: #000; display: flex; align-items: center; justify-content: center; overflow: hidden; }
         .view-card-item img { width: 100%; height: 100%; object-fit: contain; display: block; }
         .view-card-item span { font-size: 0.8rem; color: #ddd; padding: 8px; text-align: center; line-height: 1.2; background: #222; font-weight: bold; }
 
-        /* [인쇄 설정] 4열 배치 + 3:4 비율 + contain + 페이지당 정확히 4줄(16개) 제어 */
+        /* [인쇄 설정] 원본 유지 */
         @media print {
             body * { visibility: hidden; }
             #textModal, #textModal * { visibility: visible; }
@@ -72,7 +72,7 @@
             
             .view-card-grid { 
                 display: grid !important; 
-                grid-template-columns: repeat(4, 1fr) !important; /* 4열 배치 강제 */
+                grid-template-columns: repeat(4, 1fr) !important; 
                 gap: 6px !important; 
                 overflow: visible !important;
                 padding: 0 !important;
@@ -85,7 +85,7 @@
                 break-inside: avoid !important;
                 page-break-inside: avoid !important;
                 margin-bottom: 6px !important;
-                aspect-ratio: 3 / 4 !important; /* 3:4 비율 고정 */
+                aspect-ratio: 3 / 4 !important; 
                 display: flex !important;
                 flex-direction: column !important;
                 overflow: hidden !important;
@@ -104,7 +104,7 @@
             .view-card-item img {
                 width: 100% !important;
                 height: 100% !important;
-                object-fit: contain !important; /* 이미지가 절대 잘리지 않도록 전체 표시 */
+                object-fit: contain !important; 
             }
             
             .view-card-item span { 
@@ -115,8 +115,7 @@
                 padding: 2px !important;
             }
 
-            /* 4열 기준 한 페이지당 정확히 4줄(16개)마다 페이지 강제 나눔 */
-            .view-card-item:nth-child(16n) {
+            .view-card-item:nth-child(20n) {
                 break-after: page !important;
                 page-break-after: always !important;
             }
