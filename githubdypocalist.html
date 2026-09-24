@@ -34,41 +34,45 @@
         .sub-actions { display: flex; justify-content: space-between; align-items: center; padding: 8px 15px; background: #1a1a1a; border-bottom: 1px solid #333; font-size: 0.8rem; flex-shrink: 0; }
         .sub-btn { background: #333; color: #fff; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; }
         
-        /* 이미지 잘림 없이 전체가 다 보이도록 object-fit: contain 적용 및 비율 조정 */
-        .modal-grid { flex-grow: 1; overflow-y: auto; display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; padding: 15px; align-content: start; }
-        .grid-item { background: #1a1a1a; border-radius: 8px; overflow: hidden; display: flex; flex-direction: column; position: relative; border: 2px solid transparent; cursor: pointer; }
+        /* [수정완료] 목록 그리드: 이미지 잘림 방지 (object-fit: contain 및 여백 확보) */
+        .modal-grid { flex-grow: 1; overflow-y: auto; display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; padding: 10px; align-content: start; }
+        .grid-item { background: #1a1a1a; border-radius: 6px; overflow: hidden; display: flex; flex-direction: column; position: relative; border: 2px solid transparent; cursor: pointer; }
         .grid-item.selected { border-color: #2196F3; }
-        .grid-item.selected::after { content: '✓'; position: absolute; top: 5px; right: 5px; background: #2196F3; color: white; width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: bold; z-index: 3; }
+        .grid-item.selected::after { content: '✓'; position: absolute; top: 3px; right: 3px; background: #2196F3; color: white; width: 16px; height: 16px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.65rem; font-weight: bold; z-index: 3; }
         
         .grid-item.already-my { opacity: 0.45; cursor: not-allowed; border-color: #555; }
-        .grid-item.already-my::before { content: '내포카완료'; position: absolute; top: 5px; left: 5px; background: #666; color: white; padding: 2px 5px; font-size: 0.6rem; border-radius: 4px; font-weight: bold; z-index: 2; }
+        .grid-item.already-my::before { content: '완료'; position: absolute; top: 3px; left: 3px; background: #666; color: white; padding: 1px 3px; font-size: 0.55rem; border-radius: 3px; font-weight: bold; z-index: 2; }
 
-        .grid-item img { width: 100%; aspect-ratio: 3/4; object-fit: contain; background: #111; display: block; flex-shrink: 0; }
-        .grid-item span { font-size: 0.68rem; color: #ccc; padding: 8px 4px; text-align: center; line-height: 1.25; word-break: keep-all; background: #222; }
+        /* 절대 잘리지 않도록 contain 적용 및 패딩 공간 부여 */
+        .grid-item .img-box { width: 100%; aspect-ratio: 3/4; background: #000; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+        .grid-item img { width: 100%; height: 100%; object-fit: contain; display: block; }
+        .grid-item span { font-size: 0.6rem; color: #ccc; padding: 5px 3px; text-align: center; line-height: 1.1; word-break: keep-all; background: #222; flex-grow: 1; display: flex; align-items: center; justify-content: center; }
         
         .modal-footer { padding: 15px; background: #222; display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-shrink: 0; }
         .reclassify-btn { background: #2196F3; color: white; border: none; padding: 10px 12px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 0.85rem; }
         .confirm-btn { background: #4CAF50; color: white; border: none; padding: 10px 12px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 0.85rem; flex-grow: 1; text-align: center; }
         .remove-btn { background: #ff5252; color: white; border: none; padding: 10px 12px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 0.85rem; flex-grow: 1; text-align: center; display: none; }
-        .empty-msg { text-align: center; color: #777; margin-top: 50px; grid-column: span 3; }
+        .empty-msg { text-align: center; color: #777; margin-top: 50px; grid-column: span 4; }
 
-        /* 인쇄 및 전체보기 모달 스타일 */
+        /* 인쇄 및 전체보기 전용 팝업 뷰어 */
         .text-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #111; display: none; flex-direction: column; z-index: 20; padding: 15px; box-sizing: border-box; }
         .text-modal-content { flex-grow: 1; background: #1a1a1a; border-radius: 8px; display: flex; flex-direction: column; overflow: hidden; margin-bottom: 15px; border: 1px solid #333; }
         
-        .view-card-grid { flex-grow: 1; overflow-y: auto; display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 12px; padding: 15px; align-content: start; width: 100%; box-sizing: border-box; }
-        .view-card-item { background: #222; border-radius: 8px; overflow: hidden; display: flex; flex-direction: column; }
-        .view-card-item img { width: 100%; aspect-ratio: 3/4; object-fit: contain; background: #111; display: block; }
-        .view-card-item span { font-size: 0.7rem; color: #ccc; padding: 6px; text-align: center; line-height: 1.2; }
+        .view-card-grid { flex-grow: 1; overflow-y: auto; display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; padding: 10px; align-content: start; width: 100%; box-sizing: border-box; }
+        .view-card-item { background: #222; border-radius: 6px; overflow: hidden; display: flex; flex-direction: column; }
+        .view-card-item .img-box { width: 100%; aspect-ratio: 3/4; background: #000; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+        .view-card-item img { width: 100%; height: 100%; object-fit: contain; display: block; }
+        .view-card-item span { font-size: 0.6rem; color: #ccc; padding: 5px 3px; text-align: center; line-height: 1.1; background: #222; }
 
         @media print {
             body * { visibility: hidden; }
             #textModal, #textModal * { visibility: visible; }
             #textModal { position: absolute; left: 0; top: 0; width: 100%; background: white; color: black; padding: 0; }
             .text-modal-content { background: white; border: none; }
-            .view-card-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+            .view-card-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
             .view-card-item { background: #fff; border: 1px solid #ddd; }
-            .view-card-item span { color: black; }
+            .view-card-item .img-box { background: #fff; }
+            .view-card-item span { color: black; background: #fff; }
             #textModal button { display: none; }
         }
     </style>
@@ -350,7 +354,9 @@
                 }
 
                 item.innerHTML = `
-                    <img src="${card.img}" alt="포카">
+                    <div class="img-box">
+                        <img src="${card.img}" alt="포카">
+                    </div>
                     <span>${card.name || '이름 없음'}</span>
                 `;
                 grid.appendChild(item);
@@ -429,7 +435,9 @@
                     const item = document.createElement('div');
                     item.className = 'view-card-item';
                     item.innerHTML = `
-                        <img src="${c.img}" alt="포카 이미지">
+                        <div class="img-box">
+                            <img src="${c.img}" alt="포카 이미지">
+                        </div>
                         <span>${c.name || '이름 없음'}</span>
                     `;
                     gridContainer.appendChild(item);
