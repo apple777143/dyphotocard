@@ -6,19 +6,19 @@
     <title>스마트 포카 3단계 분류기</title>
     <style>
         body { font-family: sans-serif; margin: 0; padding: 0; background: #111; color: white; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
-        header { display: flex; justify-content: space-between; align-items: center; padding: 12px 15px; background: #222; font-size: 0.85rem; }
+        header { display: flex; justify-content: space-between; align-items: center; padding: 12px 15px; background: #222; font-size: 0.85rem; flex-shrink: 0; }
         .counter { color: #aaa; }
         .header-btns { display: flex; gap: 5px; flex-wrap: wrap; justify-content: flex-end; }
         .view-toggle { background: #444; color: white; border: none; padding: 5px 8px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 0.75rem; }
         .view-toggle.special { background: #ff9800; }
         
-        /* 카드 뷰 영역 */
-        .card-container { flex-grow: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; position: relative; padding: 20px; }
-        .card-card { width: 100%; max-width: 300px; height: 380px; background: #222; border-radius: 16px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.5); display: flex; flex-direction: column; position: relative; }
-        .card-card img { width: 100%; height: 100%; object-fit: cover; background: #333; }
+        /* 카드 뷰 영역 (비율 및 크기 수정 완료) */
+        .card-container { flex-grow: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; position: relative; padding: 15px; box-sizing: border-box; overflow: hidden; }
+        .card-card { width: 100%; max-width: 280px; max-height: 65vh; background: #222; border-radius: 16px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.5); display: flex; flex-direction: column; position: relative; }
+        .card-card img { width: 100%; height: 100%; object-fit: contain; background: #1a1a1a; display: block; }
         
         /* 3분할 버튼 영역 */
-        .btn-group { display: flex; width: 100%; max-width: 300px; gap: 10px; padding: 15px 0; justify-content: center; }
+        .btn-group { display: flex; width: 100%; max-width: 280px; gap: 10px; padding: 15px 0; justify-content: center; flex-shrink: 0; }
         .action-btn { flex: 1; padding: 12px 5px; border: none; border-radius: 10px; font-size: 0.95rem; font-weight: bold; cursor: pointer; text-align: center; }
         .btn-pass { background: #333; color: #ff4d4d; }
         .btn-hold { background: #333; color: #ffcc00; }
@@ -26,12 +26,12 @@
         
         /* 목록 모달 뷰 */
         .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #111; display: none; flex-direction: column; z-index: 10; }
-        .modal-header { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; background: #222; }
-        .modal-tabs { display: flex; background: #1a1a1a; padding: 10px; gap: 5px; justify-content: center; flex-wrap: wrap; }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; background: #222; flex-shrink: 0; }
+        .modal-tabs { display: flex; background: #1a1a1a; padding: 10px; gap: 5px; justify-content: center; flex-wrap: wrap; flex-shrink: 0; }
         .tab-btn { background: #333; color: #aaa; border: none; padding: 8px 12px; border-radius: 6px; font-size: 0.85rem; font-weight: bold; cursor: pointer; }
         .tab-btn.active { background: #555; color: white; }
         
-        .sub-actions { display: flex; justify-content: space-between; align-items: center; padding: 8px 15px; background: #1a1a1a; border-bottom: 1px solid #333; font-size: 0.8rem; }
+        .sub-actions { display: flex; justify-content: space-between; align-items: center; padding: 8px 15px; background: #1a1a1a; border-bottom: 1px solid #333; font-size: 0.8rem; flex-shrink: 0; }
         .sub-btn { background: #333; color: #fff; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; }
         
         .modal-grid { flex-grow: 1; overflow-y: auto; display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; padding: 15px; align-content: start; }
@@ -45,7 +45,7 @@
         .grid-item img { width: 100%; aspect-ratio: 3/4; object-fit: cover; background: #333; }
         .grid-item span { font-size: 0.68rem; color: #ccc; padding: 8px 4px; text-align: center; line-height: 1.25; word-break: keep-all; }
         
-        .modal-footer { padding: 15px; background: #222; display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+        .modal-footer { padding: 15px; background: #222; display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-shrink: 0; }
         .reclassify-btn { background: #2196F3; color: white; border: none; padding: 10px 12px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 0.85rem; }
         .confirm-btn { background: #4CAF50; color: white; border: none; padding: 10px 12px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 0.85rem; flex-grow: 1; text-align: center; }
         .remove-btn { background: #ff5252; color: white; border: none; padding: 10px 12px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 0.85rem; flex-grow: 1; text-align: center; display: none; }
@@ -144,16 +144,14 @@
         let reclassifyList = [];    
         let selectedCards = new Set(); 
 
-        // 1. 외부 JSON 파일에서 데이터 불러오기 + 로컬 상태 병합 (이미지 주소 기준 고유 매칭)
         async function initApp() {
             try {
-                const response = await fetch('dypocalist.json'); // 깃허브에 올릴 JSON 파일 이름
+                const response = await fetch('dypocalist.json');
                 if (!response.ok) throw new Error('dypocalist.json 파일을 불러오지 못했습니다.');
                 const rawData = await response.json();
                 
-                // 이미지 URL을 고유 ID로 활용하여 안전하게 매핑
                 cards = rawData.map((item, index) => ({
-                    id: item.img, // 이미지 주소 자체를 고유 ID로 사용 (순서가 바뀌어도 기록 안 꼬임)
+                    id: item.img, 
                     name: item.name,
                     img: item.img,
                     status: 'none',
@@ -475,7 +473,6 @@
             }
         }
 
-        // 앱 시작 시 외부 JSON 데이터 로드
         initApp();
     </script>
 </body>
