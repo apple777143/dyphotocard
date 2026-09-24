@@ -14,8 +14,8 @@
         
         /* 카드 뷰 영역 */
         .card-container { flex-grow: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; position: relative; padding: 15px; box-sizing: border-box; overflow: hidden; }
-        .card-card { width: 100%; max-width: 280px; max-height: 65vh; aspect-ratio: 3/4; background: #222; border-radius: 16px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.5); display: flex; flex-direction: column; position: relative; }
-        .card-card img { width: 100%; height: 100%; object-fit: cover; background: #1a1a1a; display: block; }
+        .card-card { width: 100%; max-width: 280px; max-height: 65vh; background: #222; border-radius: 16px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.5); display: flex; flex-direction: column; position: relative; }
+        .card-card img { width: 100%; height: 100%; object-fit: contain; background: #1a1a1a; display: block; }
         
         /* 3분할 버튼 영역 */
         .btn-group { display: flex; width: 100%; max-width: 280px; gap: 10px; padding: 15px 0; justify-content: center; flex-shrink: 0; }
@@ -24,7 +24,7 @@
         .btn-hold { background: #333; color: #ffcc00; }
         .btn-save { background: #4CAF50; color: white; }
         
-        /* 목록 모달 화면 */
+        /* 목록 모달 화면: 인쇄 화면과 동일하게 3열 배치 + 3:4 비율 적용 */
         .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #111; display: none; flex-direction: column; z-index: 10; }
         .modal-header { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; background: #222; flex-shrink: 0; }
         .modal-tabs { display: flex; background: #1a1a1a; padding: 10px; gap: 5px; justify-content: center; flex-wrap: wrap; flex-shrink: 0; }
@@ -34,19 +34,17 @@
         .sub-actions { display: flex; justify-content: space-between; align-items: center; padding: 8px 15px; background: #1a1a1a; border-bottom: 1px solid #333; font-size: 0.8rem; flex-shrink: 0; }
         .sub-btn { background: #333; color: #fff; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; }
         
-        /* 모달 그리드: 3열 배치 (세로형 고정 비율 강제 적용) */
         .modal-grid { flex-grow: 1; overflow-y: auto; display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; padding: 12px; align-content: start; -webkit-overflow-scrolling: touch; }
-        .grid-item { background: #1a1a1a; border-radius: 8px; overflow: hidden; display: flex; flex-direction: column; position: relative; border: 2px solid transparent; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+        .grid-item { background: #1a1a1a; border-radius: 8px; overflow: hidden; display: flex; flex-direction: column; position: relative; border: 2px solid transparent; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.3); aspect-ratio: 3 / 4; }
         .grid-item.selected { border-color: #2196F3; }
         .grid-item.selected::after { content: '✓'; position: absolute; top: 6px; right: 6px; background: #2196F3; color: white; width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: bold; z-index: 3; }
         
         .grid-item.already-my { opacity: 0.45; cursor: not-allowed; border-color: #555; }
         .grid-item.already-my::before { content: '완료'; position: absolute; top: 6px; left: 6px; background: #666; color: white; padding: 2px 5px; font-size: 0.65rem; border-radius: 4px; font-weight: bold; z-index: 2; }
 
-        /* [핵심 수정] 카드 자체를 세로형 비율로 고정하고 이미지를 꽉 채우거나 컨테인 처리 */
-        .grid-item-img-box { width: 100%; aspect-ratio: 3/4; background: #000; overflow: hidden; position: relative; }
-        .grid-item img { width: 100%; height: 100%; object-fit: cover; display: block; }
-        .grid-item span { font-size: 0.65rem; color: #ddd; padding: 6px 4px; text-align: center; line-height: 1.1; word-break: keep-all; background: #222; font-weight: bold; display: block; }
+        .grid-item .img-box { width: 100%; flex: 1; background: #000; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+        .grid-item img { width: 100%; height: 100%; object-fit: contain; display: block; }
+        .grid-item span { font-size: 0.7rem; color: #ddd; padding: 6px 4px; text-align: center; line-height: 1.1; word-break: keep-all; background: #222; font-weight: bold; }
         
         .modal-footer { padding: 15px; background: #222; display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-shrink: 0; }
         .reclassify-btn { background: #2196F3; color: white; border: none; padding: 10px 12px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 0.85rem; }
@@ -58,13 +56,13 @@
         .text-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #111; display: none; flex-direction: column; z-index: 20; padding: 15px; box-sizing: border-box; }
         .text-modal-content { flex-grow: 1; background: #1a1a1a; border-radius: 8px; display: flex; flex-direction: column; overflow: hidden; margin-bottom: 15px; border: 1px solid #333; }
         
-        .view-card-grid { flex-grow: 1; overflow-y: auto; display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; padding: 15px; align-content: start; width: 100%; box-sizing: border-box; -webkit-overflow-scrolling: touch; }
-        .view-card-item { background: #222; border-radius: 8px; overflow: hidden; display: flex; flex-direction: column; }
-        .view-card-img-box { width: 100%; aspect-ratio: 3/4; background: #000; overflow: hidden; }
-        .view-card-item img { width: 100%; height: 100%; object-fit: cover; display: block; }
-        .view-card-item span { font-size: 0.8rem; color: #ddd; padding: 8px; text-align: center; line-height: 1.2; background: #222; font-weight: bold; display: block; }
+        .view-card-grid { flex-grow: 1; overflow-y: auto; display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; padding: 15px; align-content: start; width: 100%; box-sizing: border-box; -webkit-overflow-scrolling: touch; }
+        .view-card-item { background: #222; border-radius: 8px; overflow: hidden; display: flex; flex-direction: column; aspect-ratio: 3 / 4; }
+        .view-card-item .img-box { width: 100%; flex: 1; background: #000; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+        .view-card-item img { width: 100%; height: 100%; object-fit: contain; display: block; }
+        .view-card-item span { font-size: 0.8rem; color: #ddd; padding: 8px; text-align: center; line-height: 1.2; background: #222; font-weight: bold; }
 
-        /* [인쇄 설정] 세로형 비율 유지 */
+        /* [인쇄 설정] 주신 코드 원본 그대로 유지 (4열 + 16n 페이지 나눔) */
         @media print {
             body * { visibility: hidden; }
             #textModal, #textModal * { visibility: visible; }
@@ -86,21 +84,26 @@
                 break-inside: avoid !important;
                 page-break-inside: avoid !important;
                 margin-bottom: 6px !important;
+                aspect-ratio: 3 / 4 !important; 
                 display: flex !important;
                 flex-direction: column !important;
                 overflow: hidden !important;
             }
             
-            .view-card-img-box {
+            .view-card-item .img-box { 
+                background: #fff !important; 
                 width: 100% !important;
-                aspect-ratio: 3/4 !important;
-                background: #fff !important;
+                flex: 1 !important;
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+                overflow: hidden !important;
             }
 
             .view-card-item img {
                 width: 100% !important;
                 height: 100% !important;
-                object-fit: cover !important; 
+                object-fit: contain !important; 
             }
             
             .view-card-item span { 
@@ -111,7 +114,7 @@
                 padding: 2px !important;
             }
 
-            .view-card-item:nth-child(20n) {
+            .view-card-item:nth-child(16n) {
                 break-after: page !important;
                 page-break-after: always !important;
             }
@@ -397,7 +400,7 @@
                 }
 
                 item.innerHTML = `
-                    <div class="grid-item-img-box">
+                    <div class="img-box">
                         <img src="${card.img}" alt="포카">
                     </div>
                     <span>${card.name || '이름 없음'}</span>
@@ -478,7 +481,7 @@
                     const item = document.createElement('div');
                     item.className = 'view-card-item';
                     item.innerHTML = `
-                        <div class="view-card-img-box">
+                        <div class="img-box">
                             <img src="${c.img}" alt="포카 이미지">
                         </div>
                         <span>${c.name || '이름 없음'}</span>
