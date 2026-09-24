@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>스마트 포카 3단계 분류기</title>
+    <style>
+        body { font-family: sans-serif; margin: 0; padding: 0; background: #111; color: white; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+        header { display: flex; justify-content: space-between; align-items: center; padding: 12px 15px; background: #222; font-size: 0.85rem; }
+        .counter { color: #aaa; }
+        .header-btns { display: flex; gap: 5px; flex-wrap: wrap; justify-content: flex-end; }
+        .view-toggle { background: #444; color: white; border: none; padding: 5px 8px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 0.75rem; }
+        .view-toggle.special { background: #ff9800; }
+        
+        /* 카드 뷰 영역 */
+        .card-container { flex-grow: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; position: relative; padding: 20px; }
+        .card-card { width: 100%; max-width: 300px; height: 380px; background: #222; border-radius: 16px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.5); display: flex; flex-direction: column; position: relative; }
+        .card-card img { width: 100%; height: 100%; object-fit: cover; background: #333; }
+        
+        /* 3분할 버튼 영역 */
+        .btn-group { display: flex; width: 100%; max-width: 300px; gap: 10px; padding: 15px 0; justify-content: center; }
+        .action-btn { flex: 1; padding: 12px 5px; border: none; border-radius: 10px; font-size: 0.95rem; font-weight: bold; cursor: pointer; text-align: center; }
+        .btn-pass { background: #333; color: #ff4d4d; }
+        .btn-hold { background: #333; color: #ffcc00; }
+        .btn-save { background: #4CAF50; color: white; }
+        
+        /* 목록 모달 뷰 */
+        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #111; display: none; flex-direction: column; z-index: 10; }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; background: #222; }
+        .modal-tabs { display: flex; background: #1a1a1a; padding: 10px; gap: 5px; justify-content: center; flex-wrap: wrap; }
+        .tab-btn { background: #333; color: #aaa; border: none; padding: 8px 12px; border-radius: 6px; font-size: 0.85rem; font-weight: bold; cursor: pointer; }
+        .tab-btn.active { background: #555; color: white; }
+        
+        .sub-actions { display: flex; justify-content: space-between; align-items: center; padding: 8px 15px; background: #1a1a1a; border-bottom: 1px solid #333; font-size: 0.8rem; }
+        .sub-btn { background: #333; color: #fff; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; }
+        
+        .modal-grid { flex-grow: 1; overflow-y: auto; display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; padding: 15px; align-content: start; }
+        .grid-item { background: #222; border-radius: 8px; overflow: hidden; display: flex; flex-direction: column; height: fit-content; position: relative; border: 2px solid transparent; cursor: pointer; }
+        .grid-item.selected { border-color: #2196F3; }
+        .grid-item.selected::after { content: '✓'; position: absolute; top: 5px; right: 5px; background: #2196F3; color: white; width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: bold; }
+        
+        .grid-item.already-my { opacity: 0.45; cursor: not-allowed; border-color: #555; }
+        .grid-item.already-my::before { content: '내포카완료'; position: absolute; top: 5px; left: 5px; background: #666; color: white; padding: 2px 5px; font-size: 0.6rem; border-radius: 4px; font-weight: bold; z-index: 2; }
+
+        .grid-item img { width: 100%; aspect-ratio: 3/4; object-fit: cover; background: #333; }
+        .grid-item span { font-size: 0.68rem; color: #ccc; padding: 8px 4px; text-align: center; line-height: 1.25; word-break: keep-all; }
+        
+        .modal-footer { padding: 15px; background: #222; display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+        .reclassify-btn { background: #2196F3; color: white; border: none; padding: 10px 12px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 0.85rem; }
+        .confirm-btn { background: #4CAF50; color: white; border: none; padding: 10px 12px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 0.85rem; flex-grow: 1; text-align: center; }
+        .remove-btn { background: #ff5252; color: white; border: none; padding: 10px 12px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 0.85rem; flex-grow: 1; text-align: center; display: none; }
+        .empty-msg { text-align: center; color: #777; margin-top: 50px; grid-column: span 3; }
+
+        /* 인쇄/전체보기 모달 스타일 */
+        .text-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #111; display: none; flex-direction: column; z-index: 20; padding: 15px; box-sizing: border-box; }
+        .text-modal-content { flex-grow: 1; background: #1a1a1a; border-radius: 8px; display: flex; flex-direction: column; overflow: hidden; margin-bottom: 15px; border: 1px solid #333; }
+        
+        .view-card-grid { flex-grow: 1; overflow-y: auto; display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 12px; padding: 15px; align-content: start; width: 100%; box-sizing: border-box; }
+        .view-card-item { background: #222; border-radius: 8px; overflow: hidden; display: flex; flex-direction: column; }
+        .view-card-item img { width: 100%; aspect-ratio: 3/4; object-fit: cover; background: #333; }
+        .view-card-item span { font-size: 0.7rem; color: #ccc; padding: 6px; text-align: center; line-height: 1.2; }
+
+        @media print {
+            body * { visibility: hidden; }
+            #textModal, #textModal * { visibility: visible; }
+            #textModal { position: absolute; left: 0; top: 0; width: 100%; background: white; color: black; padding: 0; }
+            .text-modal-content { background: white; border: none; }
+            .view-card-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+            .view-card-item { background: #fff; border: 1px solid #ddd; }
+            .view-card-item span { color: black; }
+            #textModal button { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="counter" id="counterText">로딩 중...</div>
+        <div class="header-btns">
+            <button class="view-toggle" onclick="openModal('save')">담은목록</button>
+            <button class="view-toggle" onclick="openModal('hold')">보류목록</button>
+            <button class="view-toggle" onclick="openModal('pass')">안함목록</button>
+            <button class="view-toggle special" onclick="openModal('my')">내 포카</button>
+        </div>
+    </header>
+
+    <!-- 메인 카드 넘기기 영역 -->
+    <div class="card-container" id="mainView">
+        <div class="card-card" id="cardCard">
+            <img id="cardImage" src="" alt="포카 이미지">
+        </div>
+        <div class="btn-group" id="btnGroup">
+            <button class="action-btn btn-pass" onclick="handleChoice('pass')">안 함</button>
+            <button class="action-btn btn-hold" onclick="handleChoice('hold')">보류</button>
+            <button class="action-btn btn-save" onclick="handleChoice('save')">담기</button>
+        </div>
+    </div>
+
+    <!-- 목록 모달 화면 -->
+    <div class="modal" id="listModal">
+        <div class="modal-header">
+            <strong id="modalTitle">포카 목록</strong>
+            <button class="view-toggle" onclick="closeModal()">닫기</button>
+        </div>
+        <div class="modal-tabs">
+            <button class="tab-btn" id="tabSave" onclick="switchTab('save')">담기</button>
+            <button class="tab-btn" id="tabHold" onclick="switchTab('hold')">보류</button>
+            <button class="tab-btn" id="tabPass" onclick="switchTab('pass')">안 함</button>
+            <button class="tab-btn" id="tabMy" onclick="switchTab('my')">내 포카 목록</button>
+        </div>
+        <div class="sub-actions" id="subActionsBar">
+            <span id="modalStats" style="color: #aaa;">총 0장</span>
+            <div style="display: flex; gap: 5px;">
+                <button class="sub-btn" onclick="openTextViewer(false)">이름만 복사</button>
+                <button class="sub-btn" onclick="openTextViewer(true)" style="background: #2196F3; font-weight: bold;">인쇄/전체보기 (이미지+이름)</button>
+            </div>
+        </div>
+        <div class="modal-grid" id="modalGrid"></div>
+        <div class="modal-footer" id="modalFooter">
+            <button class="reclassify-btn" id="reclassifyBtn" onclick="startReclassify()">이 목록 다시 분류하기</button>
+            <button class="confirm-btn" id="confirmToMyBtn" onclick="moveToMyCards()" style="display:none;">선택한 카드 내 포카로 담기</button>
+            <button class="remove-btn" id="removeFromMyBtn" onclick="removeFromMyCards()" style="display:none;">선택한 카드 담기 목록으로 빼기</button>
+        </div>
+    </div>
+
+    <!-- 인쇄 및 전체보기 전용 팝업 뷰어 -->
+    <div class="text-modal" id="textModal">
+        <div class="modal-header" style="background: transparent; padding: 0 0 15px 0;">
+            <strong id="textModalTitle">포카 전체 보기 & 인쇄</strong>
+            <button class="view-toggle" onclick="closeTextViewer()">닫기</button>
+        </div>
+        <div class="text-modal-content" id="textContent"></div>
+        <div style="display: flex; gap: 10px;">
+            <button class="confirm-btn" id="textModalActionBtn" style="background: #2196F3;">클립보드에 이름 복사하기</button>
+            <button class="confirm-btn" onclick="closeTextViewer()" style="background: #444;">돌아가기</button>
+        </div>
+    </div>
+
+    <script>
+        let cards = [];
+        let currentIndex = 0;
+        let currentTab = 'save';
+        let isReclassifying = false; 
+        let reclassifyList = [];    
+        let selectedCards = new Set(); 
+
+        // 1. 외부 JSON 파일에서 데이터 불러오기 + 로컬 상태 병합 (이미지 주소 기준 고유 매칭)
+        async function initApp() {
+            try {
+                const response = await fetch('dypocalist.json'); // 깃허브에 올릴 JSON 파일 이름
+                if (!response.ok) throw new Error('dypocalist.json 파일을 불러오지 못했습니다.');
+                const rawData = await response.json();
+                
+                // 이미지 URL을 고유 ID로 활용하여 안전하게 매핑
+                cards = rawData.map((item, index) => ({
+                    id: item.img, // 이미지 주소 자체를 고유 ID로 사용 (순서가 바뀌어도 기록 안 꼬임)
+                    name: item.name,
+                    img: item.img,
+                    status: 'none',
+                    isMy: false
+                }));
+
+                loadFromLocalStorage();
+                updateView();
+            } catch (error) {
+                alert('포카 데이터를 불러오는 중 에러가 발생했습니다: ' + error.message);
+            }
+        }
+
+        function loadFromLocalStorage() {
+            const savedData = localStorage.getItem('my_photocard_statuses_v2');
+            if (savedData) {
+                const statusMap = JSON.parse(savedData);
+                cards.forEach(card => {
+                    if (statusMap[card.id]) {
+                        card.status = statusMap[card.id].status || 'none';
+                        card.isMy = statusMap[card.id].isMy || false;
+                    }
+                });
+            }
+        }
+
+        function saveToLocalStorage() {
+            const statusMap = {};
+            cards.forEach(card => {
+                statusMap[card.id] = {
+                    status: card.status,
+                    isMy: card.isMy
+                };
+            });
+            localStorage.setItem('my_photocard_statuses_v2', JSON.stringify(statusMap));
+        }
+
+        function updateView() {
+            const cardCard = document.getElementById('cardCard');
+            const btnGroup = document.getElementById('btnGroup');
+            const counterText = document.getElementById('counterText');
+            let endMsg = document.getElementById('endMessage');
+
+            let activeCard = null;
+
+            if (isReclassifying) {
+                let targetList = cards.filter(c => reclassifyList.includes(c.id));
+                activeCard = targetList.find(c => c.status === 'none');
+
+                if (!activeCard) {
+                    alert('해당 목록 재분류가 완료되었습니다!');
+                    isReclassifying = false;
+                    reclassifyList = [];
+                    currentIndex = 0;
+                    updateView();
+                    return;
+                }
+
+                counterText.innerText = `[재분류] 남은 카드: ${targetList.filter(c => c.status === 'none').length}장`;
+            } else {
+                while (currentIndex < cards.length && cards[currentIndex].status !== 'none') {
+                    currentIndex++;
+                }
+
+                if (currentIndex >= cards.length) {
+                    counterText.innerText = `분류 완료!`;
+                    cardCard.style.display = 'none';
+                    btnGroup.style.display = 'none';
+                    
+                    if (!endMsg) {
+                        endMsg = document.createElement('div');
+                        endMsg.id = 'endMessage';
+                        endMsg.style.cssText = "text-align: center; padding: 20px;";
+                        endMsg.innerHTML = `
+                            <h3 style="margin-bottom: 10px; font-size: 1.2rem;">🎉 모든 포카 1차 분류 끝!</h3>
+                            <p style="color: #888; font-size: 0.85rem; margin-bottom: 20px;">상단 버튼에서 목록들을 확인해보세요.</p>
+                        `;
+                        document.getElementById('mainView').appendChild(endMsg);
+                    } else {
+                        endMsg.style.display = 'block';
+                    }
+                    return;
+                }
+                activeCard = cards[currentIndex];
+                counterText.innerText = `${currentIndex + 1} / ${cards.length}`;
+            }
+
+            cardCard.style.display = 'flex';
+            btnGroup.style.display = 'flex';
+            if (endMsg) endMsg.style.display = 'none';
+
+            document.getElementById('cardImage').src = activeCard.img;
+        }
+
+        function handleChoice(status) {
+            let activeCard = null;
+            if (isReclassifying) {
+                let targetList = cards.filter(c => reclassifyList.includes(c.id));
+                activeCard = targetList.find(c => c.status === 'none');
+            } else {
+                activeCard = cards[currentIndex];
+            }
+
+            if (activeCard) {
+                activeCard.status = status;
+                saveToLocalStorage(); 
+            }
+
+            if (!isReclassifying) {
+                currentIndex++;
+            }
+            updateView();
+        }
+
+        function openModal(tab) {
+            currentTab = tab;
+            selectedCards.clear();
+            document.getElementById('listModal').style.display = 'flex';
+            renderModalGrid();
+        }
+
+        function closeModal() {
+            document.getElementById('listModal').style.display = 'none';
+            updateView();
+        }
+
+        function switchTab(tab) {
+            currentTab = tab;
+            selectedCards.clear();
+            renderModalGrid();
+        }
+
+        function getTargetCards() {
+            if (currentTab === 'my') {
+                return cards.filter(c => c.isMy === true);
+            }
+            return cards.filter(c => c.status === currentTab);
+        }
+
+        function renderModalGrid() {
+            ['save', 'hold', 'pass', 'my'].forEach(t => {
+                const btn = document.getElementById(`tab${t.charAt(0).toUpperCase() + t.slice(1)}`);
+                if (btn) btn.className = `tab-btn ${currentTab === t ? 'active' : ''}`;
+            });
+
+            const grid = document.getElementById('modalGrid');
+            grid.innerHTML = '';
+            
+            const filteredCards = getTargetCards();
+            document.getElementById('modalStats').innerText = `총 ${filteredCards.length}장`;
+
+            const confirmBtn = document.getElementById('confirmToMyBtn');
+            const removeBtn = document.getElementById('removeFromMyBtn');
+            const reclassifyBtn = document.getElementById('reclassifyBtn');
+            const subActionsBar = document.getElementById('subActionsBar');
+
+            if (currentTab === 'save') {
+                confirmBtn.style.display = 'block';
+                removeBtn.style.display = 'none';
+                reclassifyBtn.style.display = 'block';
+                subActionsBar.style.display = 'flex';
+            } else if (currentTab === 'hold' || currentTab === 'pass') {
+                confirmBtn.style.display = 'none';
+                removeBtn.style.display = 'none';
+                reclassifyBtn.style.display = 'block';
+                subActionsBar.style.display = 'flex';
+            } else if (currentTab === 'my') {
+                confirmBtn.style.display = 'none';
+                removeBtn.style.display = 'block';
+                reclassifyBtn.style.display = 'none';
+                subActionsBar.style.display = 'flex';
+            }
+
+            if (filteredCards.length === 0) {
+                grid.innerHTML = `<div class="empty-msg">목록이 비어 있어요!</div>`;
+                return;
+            }
+
+            filteredCards.forEach(card => {
+                const item = document.createElement('div');
+                let isSelected = selectedCards.has(card.id);
+                let isAlreadyMyInSave = (currentTab === 'save' && card.isMy);
+
+                item.className = `grid-item ${isSelected ? 'selected' : ''} ${isAlreadyMyInSave ? 'already-my' : ''}`;
+                
+                if (!isAlreadyMyInSave) {
+                    item.onclick = () => {
+                        if (selectedCards.has(card.id)) {
+                            selectedCards.delete(card.id);
+                        } else {
+                            selectedCards.add(card.id);
+                        }
+                        renderModalGrid();
+                    };
+                }
+
+                item.innerHTML = `
+                    <img src="${card.img}" alt="포카">
+                    <span>${card.name || '이름 없음'}</span>
+                `;
+                grid.appendChild(item);
+            });
+        }
+
+        function moveToMyCards() {
+            if (selectedCards.size === 0) {
+                alert('내 포카 목록에 추가할 카드를 선택해주세요!');
+                return;
+            }
+            cards.forEach(c => {
+                if (selectedCards.has(c.id)) {
+                    c.isMy = true;
+                }
+            });
+            saveToLocalStorage();
+            alert(`선택한 ${selectedCards.size}장이 내 포카 목록에 추가되었습니다!`);
+            selectedCards.clear();
+            renderModalGrid();
+        }
+
+        function removeFromMyCards() {
+            if (selectedCards.size === 0) {
+                alert('담기 목록으로 되돌릴 카드를 선택해주세요!');
+                return;
+            }
+            cards.forEach(c => {
+                if (selectedCards.has(c.id)) {
+                    c.isMy = false;
+                }
+            });
+            saveToLocalStorage();
+            alert(`선택한 ${selectedCards.size}장이 내 포카 목록에서 제외되었습니다.`);
+            selectedCards.clear();
+            renderModalGrid();
+        }
+
+        function startReclassify() {
+            const targetCards = cards.filter(c => c.status === currentTab && !c.isMy);
+            if (targetCards.length === 0) {
+                alert('재분류할 카드가 없습니다! (이미 내 포카로 보낸 카드들은 제외되었습니다)');
+                return;
+            }
+
+            reclassifyList = targetCards.map(c => {
+                c.status = 'none';
+                return c.id;
+            });
+            saveToLocalStorage();
+
+            isReclassifying = true;
+            closeModal();
+        }
+
+        function openTextViewer(withImages) {
+            const targetCards = getTargetCards();
+            if (targetCards.length === 0) {
+                alert('출력할 카드가 없습니다!');
+                return;
+            }
+
+            const contentDiv = document.getElementById('textContent');
+            const actionBtn = document.getElementById('textModalActionBtn');
+            contentDiv.innerHTML = '';
+
+            if (withImages) {
+                document.getElementById('textModalTitle').innerText = `[${currentTab.toUpperCase()}] 전체 포카 모아보기`;
+                actionBtn.innerText = "이 목록 인쇄하기 (PDF 저장)";
+                actionBtn.onclick = () => window.print();
+
+                let gridContainer = document.createElement('div');
+                gridContainer.className = 'view-card-grid';
+                
+                targetCards.forEach(c => {
+                    const item = document.createElement('div');
+                    item.className = 'view-card-item';
+                    item.innerHTML = `
+                        <img src="${c.img}" alt="포카 이미지">
+                        <span>${c.name || '이름 없음'}</span>
+                    `;
+                    gridContainer.appendChild(item);
+                });
+                contentDiv.appendChild(gridContainer);
+            } else {
+                document.getElementById('textModalTitle').innerText = "포카 이름만 텍스트로 복사";
+                actionBtn.innerText = "클립보드에 이름 복사하기";
+                actionBtn.onclick = copyTextToClipboardSafely;
+
+                let textResult = "";
+                targetCards.forEach(c => {
+                    textResult += `${c.name || '이름 없음'}\n`;
+                });
+                
+                contentDiv.innerHTML = `<textarea id="copyTextArea" style="width: 100%; height: 100%; background: #111; color: #ddd; border: none; padding: 15px; font-family: sans-serif; font-size: 0.95rem; resize: none; box-sizing: border-box; outline: none; line-height: 1.5;" readonly>${textResult}</textarea>`;
+            }
+
+            document.getElementById('textModal').style.display = 'flex';
+        }
+
+        function closeTextViewer() {
+            document.getElementById('textModal').style.display = 'none';
+        }
+
+        function copyTextToClipboardSafely() {
+            const textArea = document.getElementById('copyTextArea');
+            if (!textArea) return;
+
+            textArea.select();
+            textArea.setSelectionRange(0, 99999);
+
+            try {
+                const successful = document.execCommand('copy');
+                if (successful) {
+                    alert('포카 이름들이 클립보드에 깔끔하게 복사되었습니다!');
+                } else {
+                    alert('복사에 실패했습니다. 텍스트 박스를 길게 눌러 직접 복사해주세요.');
+                }
+            } catch (err) {
+                alert('브라우저 보안으로 인해 자동 복사가 차단되었습니다. 텍스트를 직접 드래그해서 복사해주세요.');
+            }
+        }
+
+        // 앱 시작 시 외부 JSON 데이터 로드
+        initApp();
+    </script>
+</body>
+</html>
