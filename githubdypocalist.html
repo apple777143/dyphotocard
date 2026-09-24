@@ -63,7 +63,7 @@
         .view-card-item img { width: 100%; height: 100%; object-fit: contain; display: block; }
         .view-card-item span { font-size: 0.8rem; color: #ddd; padding: 8px; text-align: center; line-height: 1.2; background: #222; font-weight: bold; }
 
-        /* [인쇄 설정] 4열 배치 + 3:4 비율 + contain으로 안 잘리게 설정 + 페이지 제어 */
+        /* [인쇄 설정] 4열 배치 + 3:4 비율 + contain + 페이지당 정확히 4줄(16개) 제어 */
         @media print {
             body * { visibility: hidden; }
             #textModal, #textModal * { visibility: visible; }
@@ -115,8 +115,8 @@
                 padding: 2px !important;
             }
 
-            /* 4열 기준 한 페이지당 적정량(예: 4열 × 5줄 = 20개)마다 페이지 강제 나눔 */
-            .view-card-item:nth-child(20n) {
+            /* 4열 기준 한 페이지당 정확히 4줄(16개)마다 페이지 강제 나눔 */
+            .view-card-item:nth-child(16n) {
                 break-after: page !important;
                 page-break-after: always !important;
             }
