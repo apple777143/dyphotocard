@@ -34,15 +34,16 @@
         .sub-actions { display: flex; justify-content: space-between; align-items: center; padding: 8px 15px; background: #1a1a1a; border-bottom: 1px solid #333; font-size: 0.8rem; flex-shrink: 0; }
         .sub-btn { background: #333; color: #fff; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; }
         
+        /* 그리드 카드 겹침 방지 수정 완료 */
         .modal-grid { flex-grow: 1; overflow-y: auto; display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; padding: 15px; align-content: start; }
-        .grid-item { background: #222; border-radius: 8px; overflow: hidden; display: flex; flex-direction: column; height: fit-content; position: relative; border: 2px solid transparent; cursor: pointer; }
+        .grid-item { background: #222; border-radius: 8px; overflow: hidden; display: flex; flex-direction: column; position: relative; border: 2px solid transparent; cursor: pointer; }
         .grid-item.selected { border-color: #2196F3; }
-        .grid-item.selected::after { content: '✓'; position: absolute; top: 5px; right: 5px; background: #2196F3; color: white; width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: bold; }
+        .grid-item.selected::after { content: '✓'; position: absolute; top: 5px; right: 5px; background: #2196F3; color: white; width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: bold; z-index: 3; }
         
         .grid-item.already-my { opacity: 0.45; cursor: not-allowed; border-color: #555; }
         .grid-item.already-my::before { content: '내포카완료'; position: absolute; top: 5px; left: 5px; background: #666; color: white; padding: 2px 5px; font-size: 0.6rem; border-radius: 4px; font-weight: bold; z-index: 2; }
 
-        .grid-item img { width: 100%; aspect-ratio: 3/4; object-fit: cover; background: #333; }
+        .grid-item img { width: 100%; aspect-ratio: 3/4; object-fit: cover; background: #333; display: block; flex-shrink: 0; }
         .grid-item span { font-size: 0.68rem; color: #ccc; padding: 8px 4px; text-align: center; line-height: 1.25; word-break: keep-all; }
         
         .modal-footer { padding: 15px; background: #222; display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-shrink: 0; }
@@ -57,7 +58,7 @@
         
         .view-card-grid { flex-grow: 1; overflow-y: auto; display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 12px; padding: 15px; align-content: start; width: 100%; box-sizing: border-box; }
         .view-card-item { background: #222; border-radius: 8px; overflow: hidden; display: flex; flex-direction: column; }
-        .view-card-item img { width: 100%; aspect-ratio: 3/4; object-fit: cover; background: #333; }
+        .view-card-item img { width: 100%; aspect-ratio: 3/4; object-fit: cover; background: #333; display: block; }
         .view-card-item span { font-size: 0.7rem; color: #ccc; padding: 6px; text-align: center; line-height: 1.2; }
 
         @media print {
