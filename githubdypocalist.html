@@ -24,7 +24,7 @@
         .btn-hold { background: #333; color: #ffcc00; }
         .btn-save { background: #4CAF50; color: white; }
         
-        /* 목록 모달 화면: 3열 배치, 이미지 자연 비율(잘림 없음), 겹침 없이 아래로 스크롤 */
+        /* 목록 모달 화면 */
         .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #111; display: none; flex-direction: column; z-index: 10; }
         .modal-header { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; background: #222; flex-shrink: 0; }
         .modal-tabs { display: flex; background: #1a1a1a; padding: 10px; gap: 5px; justify-content: center; flex-wrap: wrap; flex-shrink: 0; }
@@ -68,7 +68,6 @@
         .view-card-item img { width: 100%; height: auto; object-fit: contain; display: block; }
         .view-card-item span { font-size: 0.8rem; color: #ddd; padding: 8px; text-align: center; line-height: 1.2; background: #222; font-weight: bold; }
 
-        /* [인쇄 설정] 인쇄 시에는 정렬을 위해 3:4 비율 고정 유지 (4열 + 16n 페이지 나눔) */
         @media print {
             body * { visibility: hidden; }
             #textModal, #textModal * { visibility: visible; }
@@ -180,7 +179,6 @@
         </div>
         <div class="modal-grid" id="modalGrid"></div>
         <div class="modal-footer" id="modalFooter">
-            <!-- 재분류 버튼 그룹 (선택 재분류 / 전체 재분류 분리) -->
             <button class="reclassify-btn" id="reclassifySelectedBtn" onclick="startSelectedReclassify()" style="display:none;">선택한 것만 다시 분류</button>
             <button class="reclassify-all-btn" id="reclassifyBtn" onclick="startReclassify()">이 목록 전체 재분류</button>
             
@@ -212,11 +210,11 @@
 
         async function initApp() {
             try {
-                const response = await fetch('dypocalist.json');[span_0](start_span)[span_0](end_span)
+                const response = await fetch('dypocalist.json');[span_1](start_span)[span_1](end_span)
                 if (!response.ok) throw new Error('dypocalist.json 파일을 불러오지 못했습니다.');
-                const rawData = await response.json();[span_1](start_span)[span_1](end_span)
+                const rawData = await response.json();[span_2](start_span)[span_2](end_span)
                 
-                cards = rawData.map((item, index) => ({
+                cards = rawData.map((item) => ({
                     id: item.img, 
                     name: item.name,
                     img: item.img,
@@ -227,7 +225,7 @@
                 loadFromLocalStorage();
                 updateView();
             } catch (error) {
-                alert('포카 데이터를 불러오는 중 에러가 발생했습니다: ' + error.message);
+                alert('포카 데이터를 불러오는 중 에러가 발생했습니다:\n' + error.message);
             }
         }
 
@@ -394,7 +392,7 @@
                 confirmBtn.style.display = 'block';
                 removeBtn.style.display = 'none';
                 reclassifyBtn.style.display = 'block';
-                reclassifySelectedBtn.style.display = 'block'; // 선택 재분류 버튼 표시
+                reclassifySelectedBtn.style.display = 'block';
                 subActionsBar.style.display = 'flex';
             } else if (currentTab === 'my') {
                 confirmBtn.style.display = 'none';
@@ -469,7 +467,6 @@
             renderModalGrid();
         }
 
-        // 전체 목록 재분류
         function startReclassify() {
             const targetCards = cards.filter(c => c.status === currentTab && !c.isMy);
             if (targetCards.length === 0) {
@@ -487,7 +484,6 @@
             closeModal();
         }
 
-        // 선택한 카드들만 재분류
         function startSelectedReclassify() {
             if (selectedCards.size === 0) {
                 alert('다시 분류할 카드를 체크(선택)해주세요!');
