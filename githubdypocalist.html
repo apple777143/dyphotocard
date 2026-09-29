@@ -31,6 +31,11 @@
         .tab-btn { background: #333; color: #aaa; border: none; padding: 8px 12px; border-radius: 6px; font-size: 0.85rem; font-weight: bold; cursor: pointer; }
         .tab-btn.active { background: #555; color: white; }
         
+        /* 검색바 영역 스타일 */
+        .search-container { padding: 8px 15px; background: #151515; border-bottom: 1px solid #262626; flex-shrink: 0; display: flex; }
+        .search-input { width: 100%; background: #222; border: 1px solid #444; border-radius: 6px; padding: 8px 12px; color: white; font-size: 0.85rem; outline: none; box-sizing: border-box; }
+        .search-input:focus { border-color: #2196F3; }
+
         .sub-actions { display: flex; justify-content: space-between; align-items: center; padding: 8px 15px; background: #1a1a1a; border-bottom: 1px solid #333; font-size: 0.8rem; flex-shrink: 0; }
         .sub-btn { background: #333; color: #fff; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; }
         
@@ -46,8 +51,9 @@
         .grid-item img { width: 100%; height: auto; object-fit: contain; display: block; }
         .grid-item span { font-size: 0.7rem; color: #ddd; padding: 6px 4px; text-align: center; line-height: 1.1; word-break: keep-all; background: #222; font-weight: bold; }
         
-        .modal-footer { padding: 15px; background: #222; display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-shrink: 0; }
-        .reclassify-btn { background: #2196F3; color: white; border: none; padding: 10px 12px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 0.85rem; }
+        .modal-footer { padding: 15px; background: #222; display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-shrink: 0; }
+        .reclassify-btn { background: #ff9800; color: white; border: none; padding: 10px 10px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 0.78rem; text-align: center; flex: 1; }
+        .reclassify-all-btn { background: #2196F3; color: white; border: none; padding: 10px 10px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 0.78rem; text-align: center; flex: 1; }
         .confirm-btn { background: #4CAF50; color: white; border: none; padding: 10px 12px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 0.85rem; flex-grow: 1; text-align: center; }
         .remove-btn { background: #ff5252; color: white; border: none; padding: 10px 12px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 0.85rem; flex-grow: 1; text-align: center; display: none; }
         .empty-msg { text-align: center; color: #777; margin-top: 50px; grid-column: span 3; }
@@ -161,6 +167,10 @@
             <button class="tab-btn" id="tabPass" onclick="switchTab('pass')">안 함</button>
             <button class="tab-btn" id="tabMy" onclick="switchTab('my')">내 포카 목록</button>
         </div>
+        <!-- 검색창 영역 -->
+        <div class="search-container">
+            <input type="text" id="searchInput" class="search-input" placeholder="🔍 포카 이름 키워드 검색..." oninput="renderModalGrid()">
+        </div>
         <div class="sub-actions" id="subActionsBar">
             <span id="modalStats" style="color: #aaa;">총 0장</span>
             <div style="display: flex; gap: 5px;">
@@ -170,9 +180,12 @@
         </div>
         <div class="modal-grid" id="modalGrid"></div>
         <div class="modal-footer" id="modalFooter">
-            <button class="reclassify-btn" id="reclassifyBtn" onclick="startReclassify()">이 목록 다시 분류하기</button>
+            <!-- 재분류 버튼 그룹 (선택 재분류 / 전체 재분류 분리) -->
+            <button class="reclassify-btn" id="reclassifySelectedBtn" onclick="startSelectedReclassify()" style="display:none;">선택한 것만 다시 분류</button>
+            <button class="reclassify-all-btn" id="reclassifyBtn" onclick="startReclassify()">이 목록 전체 재분류</button>
+            
             <button class="confirm-btn" id="confirmToMyBtn" onclick="moveToMyCards()" style="display:none;">선택한 카드 내 포카로 담기</button>
-            <button class="remove-btn" id="removeFromMyBtn" onclick="removeFromMyCards()" style="display:none;">선택한 카드 담기 목록으로 빼기</button>
+            <button class="remove-btn" id="removeFromMyBtn" onclick="removeFromMyCards()" style="display:none;">선택한 카드 내 포카에서 빼기</button>
         </div>
     </div>
 
@@ -199,9 +212,9 @@
 
         async function initApp() {
             try {
-                const response = await fetch('dypocalist.json');
+                const response = await fetch('dypocalist.json');[span_0](start_span)[span_0](end_span)
                 if (!response.ok) throw new Error('dypocalist.json 파일을 불러오지 못했습니다.');
-                const rawData = await response.json();
+                const rawData = await response.json();[span_1](start_span)[span_1](end_span)
                 
                 cards = rawData.map((item, index) => ({
                     id: item.img, 
@@ -255,7 +268,7 @@
                 activeCard = targetList.find(c => c.status === 'none');
 
                 if (!activeCard) {
-                    alert('해당 목록 재분류가 완료되었습니다!');
+                    alert('선택한 목록 재분류가 완료되었습니다!');
                     isReclassifying = false;
                     reclassifyList = [];
                     currentIndex = 0;
@@ -322,6 +335,7 @@
         function openModal(tab) {
             currentTab = tab;
             selectedCards.clear();
+            document.getElementById('searchInput').value = '';
             document.getElementById('listModal').style.display = 'flex';
             renderModalGrid();
         }
@@ -334,14 +348,22 @@
         function switchTab(tab) {
             currentTab = tab;
             selectedCards.clear();
+            document.getElementById('searchInput').value = '';
             renderModalGrid();
         }
 
         function getTargetCards() {
+            let baseList = [];
             if (currentTab === 'my') {
-                return cards.filter(c => c.isMy === true);
+                baseList = cards.filter(c => c.isMy === true);
+            } else {
+                baseList = cards.filter(c => c.status === currentTab);
             }
-            return cards.filter(c => c.status === currentTab);
+
+            const keyword = document.getElementById('searchInput').value.trim().toLowerCase();
+            if (!keyword) return baseList;
+
+            return baseList.filter(c => (c.name || '').toLowerCase().includes(keyword));
         }
 
         function renderModalGrid() {
@@ -353,28 +375,32 @@
             const grid = document.getElementById('modalGrid');
             grid.innerHTML = '';
             
+            let totalTabCards = currentTab === 'my' ? cards.filter(c => c.isMy === true).length : cards.filter(c => c.status === currentTab).length;
             const filteredCards = getTargetCards();
-            document.getElementById('modalStats').innerText = `총 ${filteredCards.length}장`;
+            
+            if (document.getElementById('searchInput').value.trim()) {
+                document.getElementById('modalStats').innerText = `검색 결과 ${filteredCards.length}장 (전체 ${totalTabCards}장)`;
+            } else {
+                document.getElementById('modalStats').innerText = `총 ${totalTabCards}장`;
+            }
 
             const confirmBtn = document.getElementById('confirmToMyBtn');
             const removeBtn = document.getElementById('removeFromMyBtn');
             const reclassifyBtn = document.getElementById('reclassifyBtn');
+            const reclassifySelectedBtn = document.getElementById('reclassifySelectedBtn');
             const subActionsBar = document.getElementById('subActionsBar');
 
-            if (currentTab === 'save') {
+            if (currentTab === 'save' || currentTab === 'hold' || currentTab === 'pass') {
                 confirmBtn.style.display = 'block';
                 removeBtn.style.display = 'none';
                 reclassifyBtn.style.display = 'block';
-                subActionsBar.style.display = 'flex';
-            } else if (currentTab === 'hold' || currentTab === 'pass') {
-                confirmBtn.style.display = 'none';
-                removeBtn.style.display = 'none';
-                reclassifyBtn.style.display = 'block';
+                reclassifySelectedBtn.style.display = 'block'; // 선택 재분류 버튼 표시
                 subActionsBar.style.display = 'flex';
             } else if (currentTab === 'my') {
                 confirmBtn.style.display = 'none';
                 removeBtn.style.display = 'block';
                 reclassifyBtn.style.display = 'none';
+                reclassifySelectedBtn.style.display = 'none';
                 subActionsBar.style.display = 'flex';
             }
 
@@ -386,11 +412,11 @@
             filteredCards.forEach(card => {
                 const item = document.createElement('div');
                 let isSelected = selectedCards.has(card.id);
-                let isAlreadyMyInSave = (currentTab === 'save' && card.isMy);
+                let isAlreadyMyInOther = (currentTab !== 'my' && card.isMy);
 
-                item.className = `grid-item ${isSelected ? 'selected' : ''} ${isAlreadyMyInSave ? 'already-my' : ''}`;
+                item.className = `grid-item ${isSelected ? 'selected' : ''} ${isAlreadyMyInOther ? 'already-my' : ''}`;
                 
-                if (!isAlreadyMyInSave) {
+                if (!isAlreadyMyInOther) {
                     item.onclick = () => {
                         if (selectedCards.has(card.id)) {
                             selectedCards.delete(card.id);
@@ -429,7 +455,7 @@
 
         function removeFromMyCards() {
             if (selectedCards.size === 0) {
-                alert('담기 목록으로 되돌릴 카드를 선택해주세요!');
+                alert('내 포카 목록에서 제외할 카드를 선택해주세요!');
                 return;
             }
             cards.forEach(c => {
@@ -443,6 +469,7 @@
             renderModalGrid();
         }
 
+        // 전체 목록 재분류
         function startReclassify() {
             const targetCards = cards.filter(c => c.status === currentTab && !c.isMy);
             if (targetCards.length === 0) {
@@ -457,6 +484,35 @@
             saveToLocalStorage();
 
             isReclassifying = true;
+            closeModal();
+        }
+
+        // 선택한 카드들만 재분류
+        function startSelectedReclassify() {
+            if (selectedCards.size === 0) {
+                alert('다시 분류할 카드를 체크(선택)해주세요!');
+                return;
+            }
+
+            let validSelectedIds = [];
+            selectedCards.forEach(id => {
+                let card = cards.find(c => c.id === id);
+                if (card && !card.isMy) {
+                    card.status = 'none';
+                    validSelectedIds.push(id);
+                }
+            });
+
+            if (validSelectedIds.length === 0) {
+                alert('선택한 카드 중 재분류 가능한 카드가 없습니다. (내 포카에 포함된 카드는 제외됩니다)');
+                return;
+            }
+
+            saveToLocalStorage();
+
+            reclassifyList = validSelectedIds;
+            isReclassifying = true;
+            selectedCards.clear();
             closeModal();
         }
 
